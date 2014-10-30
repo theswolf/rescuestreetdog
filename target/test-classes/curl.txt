@@ -1,3 +1,0 @@
-curl -X POST -H "Content-Type: application/json" -d '{"username":"mio@mail.com","password":"xyz","confirmPassword":"xyz"}' http://localhost:8080/signup/me
-curl -X POST -H "Content-Type: application/json" -d '{"username":"mio@mail.com","password":"xyz"}' http://localhost:8080/login
-curl -X POST -H "Content-Type: application/json" -d ''{"eyJ0eXBlIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJwYXlsb2FkIjoie1widXNlcm5hbWVcIjpcIm1pb0BtYWlsLmNvbVwiLFwicGFzc3dvcmRcIjpcInh5elwifSIsImV4cCI6MTQxNDU3NDcyMH0.yjL9H-7tygTCxC72IJV2uyuicBsqwIScDcAS8ee3S0g"} http://localhost:8080/verify
