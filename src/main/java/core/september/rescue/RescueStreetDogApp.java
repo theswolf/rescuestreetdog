@@ -15,14 +15,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 
+import core.september.rescue.conf.RestDataConfig;
 import core.september.rescue.filter.CORSFilter;
+import core.september.rescue.filter.DataFilter;
 import core.september.rescue.filter.JWTFilter;
+import core.september.rescue.repo.event.UserEventHandler;
+import core.september.rescue.service.JWTService;
+import core.september.rescue.service.UserService;
 
 @Configuration
 @EnableAutoConfiguration
-@Import(RepositoryRestMvcConfiguration.class)
+@Import(RestDataConfig.class)
 @EnableMongoRepositories
 @ComponentScan
 
@@ -33,6 +37,12 @@ public class RescueStreetDogApp {
 	
 	@Autowired
 	private Environment env;
+	
+	@Autowired
+	private JWTService jwtService;
+	
+	@Autowired
+	private UserService userService;
 	
 	@Bean
 	FilterRegistrationBean corsFilter() {
@@ -45,7 +55,15 @@ public class RescueStreetDogApp {
 	FilterRegistrationBean jwtFilter() {
 		FilterRegistrationBean registrationBean = new FilterRegistrationBean();
 		 registrationBean.addUrlPatterns("/api/sec/*");
-		 registrationBean.setFilter(new JWTFilter(env.getProperty("APP_KEY")));
+		 registrationBean.setFilter(new JWTFilter(jwtService));
+		 return registrationBean;
+	}
+	
+	@Bean
+	FilterRegistrationBean dataFilter() {
+		FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+		 registrationBean.addUrlPatterns("/api/data/*");
+		 registrationBean.setFilter(new DataFilter(jwtService,userService));
 		 return registrationBean;
 	}
 	
@@ -64,6 +82,10 @@ public class RescueStreetDogApp {
 			}
 
 		};
+	}
+	
+	 @Bean UserEventHandler userEventHandler() {
+		    return new UserEventHandler();
 	}
 
 	public static void main(String[] args) throws Exception {

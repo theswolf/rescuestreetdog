@@ -13,24 +13,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
-import com.auth0.jwt.Algorithm;
-import com.auth0.jwt.JwtProxy;
-import com.auth0.jwt.impl.BasicPayloadHandler;
-import com.auth0.jwt.impl.JwtProxyImpl;
+import core.september.rescue.service.JWTService;
 
 
 public class JWTFilter implements Filter {
 
-	private final  String secret;
+	protected final  JWTService jwtService;
 	
 	private static Log logger = LogFactory.getLog(JWTFilter.class);
 	
-	public JWTFilter(String secret) {
-		this.secret = secret;
+	public JWTFilter(JWTService jwtService) {
+		this.jwtService = jwtService;
 	}
 	
 	@Override
@@ -38,37 +32,76 @@ public class JWTFilter implements Filter {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
+
+	
+	protected String preCheck(ServletRequest req, ServletResponse resp) throws ServletException { 
+	 	String token = ((HttpServletRequest)req).getHeader("Auth");
+	    
+	    try {
+			String payload = jwtService.decode(token);
+			((HttpServletResponse)resp).setHeader("payload", payload.toString());
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new ServletException(e);
+		}
+	    
+	    return token;
+		
+	}
+	
+	protected void doFilterGET(ServletRequest req, ServletResponse resp) throws ServletException { 
+	 	preCheck(req, resp);	
+		
+	}
+	
+	protected void doFilterPOST(ServletRequest req, ServletResponse resp) throws ServletException {
+		doFilterGET(req, resp);
+	}
+	
+	protected void doFilterPUT(ServletRequest req, ServletResponse resp) throws ServletException {
+		doFilterGET(req, resp);
+	}
+	
+	protected void doFilterPATCH(ServletRequest req, ServletResponse resp) throws ServletException {
+		doFilterGET(req, resp);
+	}
+	
+	protected void doFilterDELETE(ServletRequest req, ServletResponse resp) throws ServletException {
+		doFilterGET(req, resp);
+	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
 
+		HttpServletRequest request = (HttpServletRequest) req;
 		
-		logger.debug("The app key is: "+secret);
-	    final Algorithm algorithm = Algorithm.HS256;
-		
-	    String token = ((HttpServletRequest)req).getHeader("Auth");
-	    
-	    if(token == null) {
-	    	((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	    	chain.doFilter(req, resp);
+		if(request.getMethod().equals("GET")) { 
+	    	doFilterGET(req,resp);
 	    }
 	    
-		 JwtProxy proxy = new JwtProxyImpl();
-		    proxy.setPayloadHandler(new BasicPayloadHandler());
-		    
-		    
-		try {
-			Object payload = proxy.decode(algorithm, token, secret);
-			((HttpServletResponse)resp).setHeader("payload", payload.toString());
-			
-			chain.doFilter(req, resp);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
+	    else if(request.getMethod().equals("POST")) { 
+	    	doFilterPOST(req,resp);
+	    }
+	    
+	    else if(request.getMethod().equals("PATCH")) { 
+	    	doFilterPATCH(req,resp);
+	    }
+	    
+	    else if(request.getMethod().equals("PUT")) { 
+	    	doFilterPUT(req,resp);
+	    }
+	    
+	    else if(request.getMethod().equals("DELETE")) { 
+	    	doFilterDELETE(req,resp);
+	    }
 		
-		
+	    chain.doFilter(req, resp);
 		
 	}
 

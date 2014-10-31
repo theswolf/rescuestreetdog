@@ -42,4 +42,8 @@ public class UserService {
 		return userRepo.save(user);
 		//return user;
 	}
+	
+	public UserRepo getRepo() {
+		return userRepo;
+	}
 }
