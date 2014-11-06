@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 
 
 
+
 public abstract class BaseEntity {
 	
 	@Id
@@ -16,6 +17,8 @@ public abstract class BaseEntity {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+	
 	
 	
 }

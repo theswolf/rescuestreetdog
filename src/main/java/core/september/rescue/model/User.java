@@ -1,5 +1,6 @@
 package core.september.rescue.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 
@@ -8,16 +9,15 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 //@Document
 public class User extends BaseEntity{
 	
-	private String username; //should be mail
 	private String hashedPassword;
 	
 	@DBRef
 	private Profile profile;
 	public String getUsername() {
-		return username;
+		return getId();
 	}
 	public void setUsername(String username) {
-		this.username = username;
+		setId(username);
 	}
 	public String getHashedPassword() {
 		return hashedPassword;
@@ -31,6 +31,7 @@ public class User extends BaseEntity{
 	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
+	
 	
 	
 	

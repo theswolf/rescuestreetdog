@@ -16,6 +16,8 @@
 
 package integration;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +28,9 @@ import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,11 +42,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import core.september.rescue.RescueStreetDogApp;
 import core.september.rescue.controller.SignInController.LoginRequest;
 import core.september.rescue.controller.SignUpController.SignUpParms;
+import core.september.rescue.model.Profile;
 import core.september.rescue.model.User;
+import core.september.rescue.repo.ProfileRepo;
 import core.september.rescue.repo.UserRepo;
 import core.september.rescue.service.UserService;
 
@@ -63,11 +72,17 @@ public class ControllersTests {
 	@Autowired
 	private UserRepo userRepo;
 	@Autowired
+	private ProfileRepo profileRepo;
+	@Autowired
 	private UserService userService;
+	@Autowired
+	private GridFsOperations gridOperations;
 	
 	@Before
 	public void prepareForTest() {
+		gridOperations.delete(new Query());
 		userRepo.deleteAll();
+		profileRepo.deleteAll();
 	}
 
 	@Value("${local.server.port}")
@@ -146,18 +161,6 @@ public class ControllersTests {
 		Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
 	}
 	
-	@Test
-	public void testRest() {
-		User user = new User();
-		user.setUsername("user");
-		user.setHashedPassword("password");
-		
-		ResponseEntity<String> response = new TestRestTemplate().postForEntity(
-				"http://localhost:" + this.port+"/api/data/users", user, String.class);
-		
-		System.out.println(response.getBody());
-		Assert.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
-	}
 	
 	@Test
 	public void testModify() {
@@ -176,5 +179,58 @@ public class ControllersTests {
 		Assert.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
 	}
 	
+	@Test
+	public void testExpire() {
+		
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.add("Auth", signup("user@mail.com", "password",null).getBody());
+		HttpEntity<String> requestEntity = new HttpEntity<String>(requestHeaders);
+		
+		ResponseEntity<String> response = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port+"/api/sec/info/environment",HttpMethod.GET, requestEntity, String.class);
+		
+		System.out.println(response.getBody());
+		Assert.assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void testFile() {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.add("Auth", signup("fileUploader@file.com", "f1l3upl04d3r", null).getBody());
+		
+		Profile profile = new Profile();
+		profile.setId("fileUploader@file.com");
+		
+		HttpEntity<Profile> requestEntity = new  HttpEntity<Profile>(profile,requestHeaders);
+		
+		ResponseEntity<Profile> save = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port+"api/sec/profile/save",HttpMethod.POST, requestEntity, Profile.class);
+		
+		System.out.println(save.getBody());
+		
+		MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
+		final String filename="somefile.txt";
+		map.add("name", filename);
+		map.add("filename", filename);
+		FileSystemResource res = new FileSystemResource("/home/christian/git/sanpaolo-ib/ibnx0_BIN/IMG/WEBPORTALDIR/web2/default/prestitimulti/app/images/prestitimulti/pdf_grigio_esito.png");
+		map.add("file", res);
+		
+		HttpEntity<MultiValueMap<String, Object>> requestMultiEntity = new  HttpEntity<MultiValueMap<String, Object>>(map,requestHeaders);
+		
+		ResponseEntity<Boolean> upload = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port+"api/sec/profile/picture",HttpMethod.POST, requestMultiEntity, Boolean.class);
+		
+		System.out.println(upload.getBody());
+		
+		
+		
+		HttpEntity<HttpHeaders> requestMe = new  HttpEntity<>(null,requestHeaders);
+		ResponseEntity<Map> pict = new TestRestTemplate().exchange(
+				"http://localhost:" + this.port+"api/sec/profile/me",HttpMethod.GET, requestMe, Map.class);
+		
+		System.out.println(pict.getBody());
+		
+		
+	}
 
 }

@@ -32,76 +32,34 @@ public class JWTFilter implements Filter {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	
 
-	
-	protected String preCheck(ServletRequest req, ServletResponse resp) throws ServletException { 
-	 	String token = ((HttpServletRequest)req).getHeader("Auth");
-	    
-	    try {
-			String payload = jwtService.decode(token);
-			((HttpServletResponse)resp).setHeader("payload", payload.toString());
-			
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new ServletException(e);
-		}
-	    
-	    return token;
-		
-	}
-	
-	protected void doFilterGET(ServletRequest req, ServletResponse resp) throws ServletException { 
-	 	preCheck(req, resp);	
-		
-	}
-	
-	protected void doFilterPOST(ServletRequest req, ServletResponse resp) throws ServletException {
-		doFilterGET(req, resp);
-	}
-	
-	protected void doFilterPUT(ServletRequest req, ServletResponse resp) throws ServletException {
-		doFilterGET(req, resp);
-	}
-	
-	protected void doFilterPATCH(ServletRequest req, ServletResponse resp) throws ServletException {
-		doFilterGET(req, resp);
-	}
-	
-	protected void doFilterDELETE(ServletRequest req, ServletResponse resp) throws ServletException {
-		doFilterGET(req, resp);
-	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp,
-			FilterChain chain) throws IOException, ServletException {
+			FilterChain chain) throws IOException {
 
-		HttpServletRequest request = (HttpServletRequest) req;
 		
-		if(request.getMethod().equals("GET")) { 
-	    	doFilterGET(req,resp);
-	    }
-	    
-	    else if(request.getMethod().equals("POST")) { 
-	    	doFilterPOST(req,resp);
-	    }
-	    
-	    else if(request.getMethod().equals("PATCH")) { 
-	    	doFilterPATCH(req,resp);
-	    }
-	    
-	    else if(request.getMethod().equals("PUT")) { 
-	    	doFilterPUT(req,resp);
-	    }
-	    
-	    else if(request.getMethod().equals("DELETE")) { 
-	    	doFilterDELETE(req,resp);
-	    }
+		 try {
+			 	String token = ((HttpServletRequest)req).getHeader("Auth");
+				String payload = jwtService.decode(token);
+				((HttpServletRequest)req).setAttribute("payload", payload.replace("\"", ""));
+				 chain.doFilter(req, resp);
+				
+			} 
+		    
+		    catch(IllegalStateException e) {
+		    	((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_CONFLICT);
+		    	((HttpServletResponse)resp).sendError(HttpServletResponse.SC_CONFLICT,e.getMessage());
+		    }
+		    
+		    catch (Exception e) {
+				// TODO Auto-generated catch block
+				((HttpServletResponse)resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				((HttpServletResponse)resp).sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
+			}
+		    
 		
-	    chain.doFilter(req, resp);
+	  
 		
 	}
 

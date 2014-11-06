@@ -24,11 +24,11 @@ public class UserService {
 	private Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 	
 	public boolean exists(String mail) {
-		return  userRepo.findByUsername(mail) != null;
+		return  userRepo.findOne(mail) != null;
 	}
 	
 	public User find(String username) {
-		return userRepo.findByUsername(username);
+		return userRepo.findOne(username);
 	}
 	
 	public boolean validateMail(String mail) {

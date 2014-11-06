@@ -11,8 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("api/sec/info")
-public class InfoController {
+@RequestMapping("api/sec/pet")
+public class PetController {
 	
 	@Autowired
 	private Environment environment;

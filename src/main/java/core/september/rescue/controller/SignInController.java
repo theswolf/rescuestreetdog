@@ -1,8 +1,9 @@
 package core.september.rescue.controller;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -80,9 +81,7 @@ public class SignInController {
 			throw new Exception("Invalid credentials!!!");
 		} 
 		
-		
-		String token = jwtService.encode(user.getId(), 1);
-	    Logger.getLogger(this.getClass()).debug(token);
+		String token = jwtService.encode(user.getId(), 2);
 	    return token;
 		
 	}

@@ -18,9 +18,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 import core.september.rescue.conf.RestDataConfig;
 import core.september.rescue.filter.CORSFilter;
-import core.september.rescue.filter.DataFilter;
 import core.september.rescue.filter.JWTFilter;
-import core.september.rescue.repo.event.UserEventHandler;
 import core.september.rescue.service.JWTService;
 import core.september.rescue.service.UserService;
 
@@ -59,13 +57,13 @@ public class RescueStreetDogApp {
 		 return registrationBean;
 	}
 	
-	@Bean
-	FilterRegistrationBean dataFilter() {
-		FilterRegistrationBean registrationBean = new FilterRegistrationBean();
-		 registrationBean.addUrlPatterns("/api/data/*");
-		 registrationBean.setFilter(new DataFilter(jwtService,userService));
-		 return registrationBean;
-	}
+//	@Bean
+//	FilterRegistrationBean dataFilter() {
+//		FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+//		 registrationBean.addUrlPatterns("/api/data/*");
+//		 registrationBean.setFilter(new DataFilter(jwtService,userService));
+//		 return registrationBean;
+//	}
 	
 	@Bean
 	protected ServletContextListener listener() {
@@ -84,9 +82,7 @@ public class RescueStreetDogApp {
 		};
 	}
 	
-	 @Bean UserEventHandler userEventHandler() {
-		    return new UserEventHandler();
-	}
+	
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(RescueStreetDogApp.class, args);

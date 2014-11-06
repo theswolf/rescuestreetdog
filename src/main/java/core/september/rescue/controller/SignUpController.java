@@ -1,5 +1,7 @@
 package core.september.rescue.controller;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,7 +63,7 @@ public class SignUpController {
 		}
 		
 		User user = userService.saveUser(params.username, params.password);
-		String token = jwtService.encode(user.getId(), 1);
+		String token = jwtService.encode(user.getId(), 2);
 		return token;
 	}
 	
